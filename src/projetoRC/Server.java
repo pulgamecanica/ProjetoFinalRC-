@@ -26,6 +26,10 @@ public class Server {
 	}	
 	
 	public static class EchoClientThread implements Runnable{
+		private static final int PORTUDP = 9031;
+		private static DatagramSocket datagramSocket;
+		private static DatagramPacket outPacket;
+		private static InetAddress clientInnetAddressIP;
 		private Socket socket;
 		public EchoClientThread(Socket socket) {
 			this.socket = socket;
@@ -38,9 +42,11 @@ public class Server {
 				// create log
 				System.out.println("conectado com " + clientIP);		
 				try {
-					///UDP Request!
-					PrintStream output = new PrintStream(socket.getOutputStream(),true);
-					output.println("---MENU---");
+					String messageOut = "MENU CLIENTE\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 – Sair\n";
+					clientInnetAddressIP = socket.getInetAddress();
+					datagramSocket = new DatagramSocket();
+					outPacket =	new DatagramPacket(messageOut.getBytes(),messageOut.length(), clientInnetAddressIP, PORTUDP);
+					datagramSocket.send(outPacket);
 				}catch (Exception ex){
 					ex.printStackTrace();
 				}		
