@@ -9,9 +9,6 @@ public class Server {
 	private static final File LISTABRANCA = new File("lista-branca.txt");
 	private static final File LISTANEGRA = new File("lista-negra.txt");
 	private static final int PORT = 7142;
-	static String[] sentences = new String[] { "Bom dia", "Bem disposto?", "Ola", "Boas", "Viva" };
-    static DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-    static DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
     
 	public static void main(String args[]) throws Exception {		
 		ServerSocket server = new ServerSocket(PORT);
@@ -37,12 +34,12 @@ public class Server {
 		public void run() {	
 			String threadName = Thread.currentThread().getName();
 			String clientIP = socket.getInetAddress().toString();
-			System.out.println("Recieved IP ADDRESS: " + clientIP);
 			if (checkValidIP(clientIP)) {
 				// create log
 				System.out.println("conectado com " + clientIP);		
-				try {
+				try { //Print Menu(UDP)
 					sendMessageUDP(getMenu());
+					System.out.println("Im here Dude!");
 				}catch (Exception ex){
 					ex.printStackTrace();
 				}		
@@ -58,40 +55,34 @@ public class Server {
 				}
 			}
 			
-			try {				
-				BufferedReader input = new BufferedReader(
-						new InputStreamReader(socket.getInputStream()));			
-				PrintStream output = new PrintStream(
-						socket.getOutputStream(),true);
-				String messageIn = null, messageOut = null;
+			try { // Receive Options (TCP) -> Send Response UDP
+				BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));			
+				String messageIn = null;
 				while ((messageIn = input.readLine()) !=null) {				
 					System.out.println (clientIP+": "+threadName+": "+messageIn);
-					if (messageIn.equalsIgnoreCase("tchau")){
-						output.println("..");
+					if (messageIn.contains("99")){ // Client Exit -> Change Online Status
+						System.out.println("...");
+						System.out.println("Socket Closed :" + clientIP);
+						socket.close();
 						break;
-					}	
-					if (messageIn.equalsIgnoreCase("frase")) { 	
-					    output.println(sentences[rand(0,sentences.length-1)]);
-					} else if (messageIn.equalsIgnoreCase("listar")) {
-						messageOut = Arrays.toString(sentences); 
-						output.println(messageOut);
-					} else if (messageIn.equalsIgnoreCase("data")) {
-		                Date date = new Date();
-						messageOut = dateFormat.format(date); 
-						output.println(messageOut);	
-					} else if (messageIn.equalsIgnoreCase("horas")) {
-		                Date date = new Date();
-						messageOut = timeFormat.format(date);
-						output.println(messageOut);		
+					}else if (messageIn.contains("0")) {
+						sendMessageUDP(getMenu());
+					} else if (messageIn.contains("1")) {
+						sendMessageUDP("You choose the option 1");
+					} else if (messageIn.contains("2")) {
+						sendMessageUDP("You choose the option 2");
+					} else if (messageIn.contains("3")) {
+						sendMessageUDP("You choose the option 3");		
+					} else if (messageIn.contains("4")) {
+						sendMessageUDP("You choose the option 4");
+					} else if (messageIn.contains("5")) {
+						sendMessageUDP("You choose the option 5");
 					} else {
-						output.println("comando desconhecido!");
-					}	
+						sendMessageUDP("Not a valid Option");
+					}
 				} 
-				input.close(); 
-				output.close();
-				socket.close();							
-			}
-			catch (Exception ex){
+				input.close(); 							
+			}catch (Exception ex){
 				try {
 					socket.close();
 					System.out.println("Socket Closed :" + clientIP);
@@ -101,7 +92,7 @@ public class Server {
 					System.err.println("Somehting went wrong... can't close the socket");
 				}
 				ex.printStackTrace();
-			}	
+			}
 		}
 		private String getMenu() {
 			return "MENU CLIENTE\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 – Sair\n";
@@ -112,6 +103,7 @@ public class Server {
 				datagramSocket = new DatagramSocket();
 				outPacket =	new DatagramPacket(message.getBytes(),message.length(), clientInnetAddressIP, PORTUDP);
 				datagramSocket.send(outPacket);
+				datagramSocket.close();
 			}catch (Exception ex){
 				ex.printStackTrace();
 			}		
