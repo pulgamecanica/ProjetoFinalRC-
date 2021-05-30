@@ -42,11 +42,7 @@ public class Server {
 				// create log
 				System.out.println("conectado com " + clientIP);		
 				try {
-					String messageOut = "MENU CLIENTE\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 – Sair\n";
-					clientInnetAddressIP = socket.getInetAddress();
-					datagramSocket = new DatagramSocket();
-					outPacket =	new DatagramPacket(messageOut.getBytes(),messageOut.length(), clientInnetAddressIP, PORTUDP);
-					datagramSocket.send(outPacket);
+					sendMessageUDP(getMenu());
 				}catch (Exception ex){
 					ex.printStackTrace();
 				}		
@@ -106,7 +102,20 @@ public class Server {
 				}
 				ex.printStackTrace();
 			}	
-		}  
+		}
+		private String getMenu() {
+			return "MENU CLIENTE\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 – Sair\n";
+		}
+		private void sendMessageUDP(String message) {
+			try {
+				clientInnetAddressIP = socket.getInetAddress();
+				datagramSocket = new DatagramSocket();
+				outPacket =	new DatagramPacket(message.getBytes(),message.length(), clientInnetAddressIP, PORTUDP);
+				datagramSocket.send(outPacket);
+			}catch (Exception ex){
+				ex.printStackTrace();
+			}		
+		}
 	}
     public static int rand(int min,int max){
         return min + (int)(Math.random() * ((max - min) + 1));
@@ -141,5 +150,3 @@ public class Server {
     	}
     }
 }
-
-

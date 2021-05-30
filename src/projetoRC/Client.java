@@ -10,7 +10,6 @@ public class Client {
 	private static final int PORTUDP = 9031;
 //	private static BufferedReader input;
 //	private static PrintStream output;
-	
 	public static void main(String args[]) throws Exception {
 		if (args.length !=1){
 			System.err.println ("Usage: java TCPClient <host>");
