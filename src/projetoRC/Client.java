@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Client {	
 	
-	private static final int port = 6500;
+	private static final int port = 7142;
 	private static BufferedReader input;
 	private static PrintStream output;
 	
