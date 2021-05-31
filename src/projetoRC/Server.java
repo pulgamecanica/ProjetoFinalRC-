@@ -9,9 +9,6 @@ public class Server {
 	private static final File LISTABRANCA = new File("lista-branca.txt");
 	private static final File LISTANEGRA = new File("lista-negra.txt");
 	private static final int PORT = 7142;
-	static String[] sentences = new String[] { "Bom dia", "Bem disposto?", "Ola", "Boas", "Viva" };
-    static DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-    static DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
     
 	public static void main(String args[]) throws Exception {		
 		ServerSocket server = new ServerSocket(PORT);
@@ -22,14 +19,15 @@ public class Server {
 			client = server.accept();
 			Thread t = new Thread(new EchoClientThread(client));                             
 			t.start();
+			// CReate UDP CLIENT!!!!
 		}		
 	}	
 	
 	public static class EchoClientThread implements Runnable{
 		private static final int PORTUDP = 9031;
-		private static DatagramSocket datagramSocket;
-		private static DatagramPacket outPacket;
-		private static InetAddress clientInnetAddressIP;
+//		private static DatagramSocket datagramSocket;
+//		private static DatagramPacket outPacket;
+//		private static InetAddress clientInnetAddressIP;
 		private Socket socket;
 		public EchoClientThread(Socket socket) {
 			this.socket = socket;
@@ -37,15 +35,10 @@ public class Server {
 		public void run() {	
 			String threadName = Thread.currentThread().getName();
 			String clientIP = socket.getInetAddress().toString();
-			System.out.println("Recieved IP ADDRESS: " + clientIP);
 			if (checkValidIP(clientIP)) {
 				// create log
-				System.out.println("conectado com " + clientIP);		
-				try {
-					sendMessageUDP(getMenu());
-				}catch (Exception ex){
-					ex.printStackTrace();
-				}		
+				System.out.println("conectado com " + clientIP);
+				
 			}else {
 				// create log
 				try {
@@ -59,34 +52,30 @@ public class Server {
 			}
 			
 			try {				
-				BufferedReader input = new BufferedReader(
-						new InputStreamReader(socket.getInputStream()));			
-				PrintStream output = new PrintStream(
-						socket.getOutputStream(),true);
-				String messageIn = null, messageOut = null;
-				while ((messageIn = input.readLine()) !=null) {				
+				BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));			
+				PrintStream output = new PrintStream(socket.getOutputStream(),true);
+				String messageIn = "0", messageOut = null;
+				do {			
 					System.out.println (clientIP+": "+threadName+": "+messageIn);
-					if (messageIn.equalsIgnoreCase("tchau")){
-						output.println("..");
+					if (messageIn.equals("0")){
+						messageOut = getMenu();
+					} else if (messageIn.equals("1")) { 	
+						messageOut = "Online Users";
+					} else if (messageIn.equals("2")) {
+						messageOut = "Send Message to user";
+					} else if (messageIn.equals("3")) {
+						messageOut = "Send General User";	
+					} else if (messageIn.equals("4")) {
+						messageOut = "White List";
+					} else if (messageIn.equals("5")) {
+						messageOut = "Black List";
+					} else if (messageIn.equals("99")) {
 						break;
-					}	
-					if (messageIn.equalsIgnoreCase("frase")) { 	
-					    output.println(sentences[rand(0,sentences.length-1)]);
-					} else if (messageIn.equalsIgnoreCase("listar")) {
-						messageOut = Arrays.toString(sentences); 
-						output.println(messageOut);
-					} else if (messageIn.equalsIgnoreCase("data")) {
-		                Date date = new Date();
-						messageOut = dateFormat.format(date); 
-						output.println(messageOut);	
-					} else if (messageIn.equalsIgnoreCase("horas")) {
-		                Date date = new Date();
-						messageOut = timeFormat.format(date);
-						output.println(messageOut);		
 					} else {
-						output.println("comando desconhecido!");
+						messageOut = "Not a Valid option";
 					}	
-				} 
+					output.println(messageOut);
+				} while ((messageIn = input.readLine()) !=null);
 				input.close(); 
 				output.close();
 				socket.close();							
@@ -102,20 +91,21 @@ public class Server {
 				}
 				ex.printStackTrace();
 			}	
+			System.out.println("Socket Closed :" + clientIP);
 		}
 		private String getMenu() {
-			return "MENU CLIENTE\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 – Sair\n";
+			return "MENU CLIENT-&-0  - Menu Inicial-&-1  - Listar utilizadores online-&-2  - Enviar mensagem a um utilizador-&-3  - Enviar mensagem a todos os utilizadores-&-4  - lista branca de utilizadores-&-5  - lista negra de utilizadores-&-99 – Sair";
 		}
-		private void sendMessageUDP(String message) {
-			try {
-				clientInnetAddressIP = socket.getInetAddress();
-				datagramSocket = new DatagramSocket();
-				outPacket =	new DatagramPacket(message.getBytes(),message.length(), clientInnetAddressIP, PORTUDP);
-				datagramSocket.send(outPacket);
-			}catch (Exception ex){
-				ex.printStackTrace();
-			}		
-		}
+//		private void sendMessageUDP(String message) {
+//			try {
+//				clientInnetAddressIP = socket.getInetAddress();
+//				datagramSocket = new DatagramSocket();
+//				outPacket =	new DatagramPacket(message.getBytes(),message.length(), clientInnetAddressIP, PORTUDP);
+//				datagramSocket.send(outPacket);
+//			}catch (Exception ex){
+//				ex.printStackTrace();
+//			}		
+//		}
 	}
     public static int rand(int min,int max){
         return min + (int)(Math.random() * ((max - min) + 1));
