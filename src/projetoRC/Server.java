@@ -6,8 +6,8 @@ import java.util.*;
 import java.io.*;
 
 public class Server {
-	private static final File LISTABRANCA = new File("lista-branca.txt");
-	private static final File LISTANEGRA = new File("lista-negra.txt");
+	private static final File WHITELIST = new File("lista-branca.txt");
+	private static final File BLACKLIST = new File("lista-negra.txt");
 	private static final int PORT = 7142;
     
 	public static void main(String args[]) throws Exception {		
@@ -24,7 +24,7 @@ public class Server {
 	}	
 	
 	public static class EchoClientThread implements Runnable{
-		private static final int PORTUDP = 9031;
+//		private static final int PORTUDP = 9031;
 //		private static DatagramSocket datagramSocket;
 //		private static DatagramPacket outPacket;
 //		private static InetAddress clientInnetAddressIP;
@@ -66,9 +66,9 @@ public class Server {
 					} else if (messageIn.equals("3")) {
 						messageOut = "Send General User";	
 					} else if (messageIn.equals("4")) {
-						messageOut = "White List";
+						messageOut = getIPs(WHITELIST, "Allowed");
 					} else if (messageIn.equals("5")) {
-						messageOut = "Black List";
+						messageOut = getIPs(BLACKLIST, "Banned");
 					} else if (messageIn.equals("99")) {
 						break;
 					} else {
@@ -96,6 +96,22 @@ public class Server {
 		private String getMenu() {
 			return "MENU CLIENT-&-0  - Menu Inicial-&-1  - Listar utilizadores online-&-2  - Enviar mensagem a um utilizador-&-3  - Enviar mensagem a todos os utilizadores-&-4  - lista branca de utilizadores-&-5  - lista negra de utilizadores-&-99 – Sair";
 		}
+	
+		private String getIPs(File file, String name) {
+			String result = name +"IP Addresses: -&-";
+			try { 
+	    		Scanner sWhite = new Scanner(file);
+	    		if(!sWhite.hasNextLine())
+	    			result = "There are no" + name + "IP Addresses";
+	    		while(sWhite.hasNextLine())
+	    			result = result + " - IP Addresss: " + sWhite.nextLine() + "-&-";
+	    		sWhite.close();
+			}catch(FileNotFoundException e) {
+	    		System.err.println(e);
+	    		return "Sorry we could't retrieve any information... :(";
+	    	}
+			return result;
+		}
 //		private void sendMessageUDP(String message) {
 //			try {
 //				clientInnetAddressIP = socket.getInetAddress();
@@ -112,27 +128,27 @@ public class Server {
     }
     public static boolean checkValidIP(String ipAddress)  {
     	try {
-    		Scanner sNegra = new Scanner (LISTANEGRA);
-    		while(sNegra.hasNextLine()) {
-    			if(ipAddress.contains(sNegra.nextLine())) {
-    				sNegra.close();
+    		Scanner sBlack = new Scanner (BLACKLIST);
+    		while(sBlack.hasNextLine()) {
+    			if(ipAddress.contains(sBlack.nextLine())) {
+    				sBlack.close();
     				return false;
     			}
     		}
-    		sNegra.close();
-    		Scanner sBranca = new Scanner(LISTABRANCA);
-	    	if(!sBranca.hasNextLine()) {
-	    		sBranca.close();
+    		sBlack.close();
+    		Scanner sWhite = new Scanner(WHITELIST);
+	    	if(!sWhite.hasNextLine()) {
+	    		sWhite.close();
 	    		return true;
 	    	}
-	    	while(sBranca.hasNextLine()) {
-	    		String linha = sBranca.nextLine();
+	    	while(sWhite.hasNextLine()) {
+	    		String linha = sWhite.nextLine();
     			if(ipAddress.contains(linha)) {
-    				sBranca.close();
+    				sWhite.close();
     				return true;
     			}
 	    	}
-	    	sBranca.close();
+	    	sWhite.close();
 	    	return false;
     	}catch(FileNotFoundException e) {
     		System.err.println(e);
