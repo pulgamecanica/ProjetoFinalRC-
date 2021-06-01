@@ -9,7 +9,7 @@ public class Client {
 	private static BufferedReader input;
 	private static PrintStream output;
 	private static DatagramSocket datagramSocket;
-	private static DatagramPackets inPacket;
+	private static DatagramPacket inPacket;
 	public static void main(String args[]) throws Exception {
 		if (args.length !=1){
 			System.err.println ("Usage: java TCPClient <host>");
@@ -34,15 +34,17 @@ public class Client {
 				break;
 			}else if (messageOut.equals("0")){
 				System.out.println(getMenu());
+				messageIn = input.readLine();
+			}else {
+				messageIn = input.readLine();
+				if(messageIn != null) {
+					String stringVec[] = messageIn.split("-&-");
+					messageIn = "";
+					for(int i = 0; i < stringVec.length; i++)
+						messageIn = messageIn + stringVec[i] + "\n";
+				}
+				System.out.println(messageIn);
 			}
-			messageIn = input.readLine();
-			if(messageIn != null) {
-				String stringVec[] = messageIn.split("-&-");
-				messageIn = "";
-				for(int i = 0; i < stringVec.length; i++)
-					messageIn = messageIn + stringVec[i] + "\n";
-			}
-			System.out.println(messageIn);
 		}
 		input.close();
 		output.close();

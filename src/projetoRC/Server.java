@@ -10,7 +10,7 @@ public class Server {
 	private static final int PORT = 7142;
 	private static final int PORTUDP = 9031;
 	private static DatagramSocket datagramSocket;
-	private static DatagramPackets outPacket;
+	private static DatagramPacket outPacket;
     
 	public static void main(String args[]) throws Exception {		
 		ServerSocket server = new ServerSocket(PORT);
@@ -49,7 +49,6 @@ public class Server {
 					ex.printStackTrace();
 				}
 			}
-			
 			try {				
 				BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));			
 				PrintStream output = new PrintStream(socket.getOutputStream(),true);
@@ -71,7 +70,7 @@ public class Server {
 					} else if (messageIn.equals("99")) {
 						onlineUsers.remove(clientIP);
 						break;
-					} else if (!messageIn.equals("0")) {
+					} else {
 						messageOut = "Not a Valid option";
 					}	
 					output.println(messageOut);
