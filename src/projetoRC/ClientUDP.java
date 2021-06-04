@@ -10,7 +10,7 @@ public class ClientUDP {
 	private static byte[] buffer;
 	public static void main(String[] args) throws Exception {
 		if (args.length !=1){
-			System.err.println ("Usage: java UDPClient <host>");
+			System.err.println ("Usage: java ClientUDP <host>");
 			System.exit(1);
 		}	
 		host = InetAddress.getByName(args[0]);			

@@ -89,7 +89,8 @@ public class Client {
 //		}
 //	}
 	
+	
 	private static String getMenu() {
-		return "MENU CLIENT\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 - Sair";
+		return "MENU CLIENT\n0  - Main Menu\n1  - List Online Users\n2  - Send Message to User\n3  - Send General Message\n4  - Show White List\n5  - Show Black List\n99 - Exit";
 	}
 }

@@ -5,15 +5,15 @@ import java.util.*;
 import java.io.*;
 
 public class Server {
-	private static final File WHITELIST = new File("lista-branca.txt");
-	private static final File BLACKLIST = new File("lista-negra.txt");
+	private static final File WHITELIST = new File("white-list.txt");
+	private static final File BLACKLIST = new File("black-list.txt");
 	private static ArrayList<InetAddress> onlineUsers = new ArrayList<InetAddress>();
 	private static final int PORT = 7142;
     
 	public static void main(String args[]) throws Exception {		
 		ServerSocket server = new ServerSocket(PORT);
 		InetAddress myIPaddress = InetAddress.getLocalHost();
-		System.out.println(myIPaddress.toString() + ":" + PORT + "/TCP");
+		System.out.println(myIPaddress.toString() + ":" + PORT );
 		Socket client = null;
 		try {
 			while (true){
@@ -41,11 +41,11 @@ public class Server {
 			if (checkValidIP(clientIP)) {
 				// create log
 				onlineUsers.add(socket.getInetAddress());
-				System.out.println("conectado com " + clientIP);	
+				System.out.println("Connected with " + clientIP);	
 			}else {
 				try {
 					socket.close();
-					System.err.println("conexao rejeitada e socket fechado" + clientIP);
+					System.err.println("Rejected connection: " + clientIP);
 					return;
 				}
 				catch (Exception ex) {
@@ -121,13 +121,15 @@ public class Server {
 			try{
 				datagramSocket = new DatagramSocket(4445);
 				if(receiverIP == null) {
+					message = "General message: " + message;
 					for(InetAddress user: onlineUsers) {
-						System.out.println (socket.getInetAddress().toString() + " -> " + user + ": " + message);   
+						System.out.println (socket.getInetAddress().toString() + " -> " + user + ": " + message);
 						outPacket =	new DatagramPacket(message.getBytes(), message.length(), user, PORTUDP);
 						datagramSocket.send(outPacket);
 					}
 				}else {
 					System.out.println(socket.getInetAddress().toString() + " -> " + receiverIP + ": " + message);   
+					message = "Message from " + socket.getInetAddress().toString() + ": " + message;
 					outPacket =	new DatagramPacket(message.getBytes(), message.length(), receiverIP, PORTUDP);
 					datagramSocket.send(outPacket);
 				}			
