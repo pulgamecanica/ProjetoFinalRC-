@@ -30,7 +30,6 @@ public class Server {
 		private Socket socket;
 		private static DatagramSocket datagramSocket;
 		private static DatagramPacket outPacket;
-		private static InetAddress clientIP; 
 		private static final int PORTUDP = 9031;
 		
 		public EchoClientThread(Socket socket) {
@@ -68,11 +67,11 @@ public class Server {
 						messageIn = input.readLine();
 						System.out.println (clientIP+" "+threadName+" trying to send message to an online User.");
 						sendMessageUDP(onlineUsers.get(Integer.parseInt(messageIn)),input.readLine());
-						continue;
+						messageOut = "Message Sent to user -> " + onlineUsers.get(Integer.parseInt(messageIn));
 					} else if (messageIn.equals("3")) { 
 						System.out.println (clientIP+" "+threadName+" Sending message to ALL online Users.");
 						sendMessageUDP(null, input.readLine());
-						continue;
+						messageOut = "Message sent to All online users!";
 					} else if (messageIn.equals("4")) {
 						messageOut = getIPs(WHITELIST, "Allowed");
 					} else if (messageIn.equals("5")) {
@@ -120,16 +119,15 @@ public class Server {
 		}
 		private void sendMessageUDP(InetAddress receiverIP, String message) { 
 			try{
-				datagramSocket = new DatagramSocket();
-				clientIP = socket.getInetAddress();
+				datagramSocket = new DatagramSocket(4445);
 				if(receiverIP == null) {
 					for(InetAddress user: onlineUsers) {
-						System.out.println (clientIP.toString() + " ->  " + user + ": " + message);   
+						System.out.println (socket.getInetAddress().toString() + " -> " + user + ": " + message);   
 						outPacket =	new DatagramPacket(message.getBytes(), message.length(), user, PORTUDP);
 						datagramSocket.send(outPacket);
 					}
 				}else {
-					System.out.println(clientIP.toString() + " ->  " + receiverIP + ": " + message);   
+					System.out.println(socket.getInetAddress().toString() + " -> " + receiverIP + ": " + message);   
 					outPacket =	new DatagramPacket(message.getBytes(), message.length(), receiverIP, PORTUDP);
 					datagramSocket.send(outPacket);
 				}			

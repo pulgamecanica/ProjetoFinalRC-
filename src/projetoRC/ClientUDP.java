@@ -4,11 +4,10 @@ import java.net.*;
 
 public class ClientUDP {
 	private static InetAddress host;
-	private static final int PORT = 9031;
+	private static final int PORTUDP = 9031;
 	private static DatagramSocket datagramSocket;
 	private static DatagramPacket inPacket;
 	private static byte[] buffer;
-
 	public static void main(String[] args) throws Exception {
 		if (args.length !=1){
 			System.err.println ("Usage: java UDPClient <host>");
@@ -18,10 +17,9 @@ public class ClientUDP {
 		accessServer();
 		System.exit(0);
 	}
-
 	private static void accessServer() {
 		try {
-			datagramSocket = new DatagramSocket(PORT, host);
+			datagramSocket = new DatagramSocket(PORTUDP, host);
 			String messageIn = null;
 			do {
 				buffer = new byte[256];

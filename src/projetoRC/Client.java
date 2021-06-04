@@ -32,22 +32,25 @@ public class Client {
 			System.out.print(">");  			
 			messageOut = scan.nextLine();
 			output.println(messageOut);
+			messageIn = "";
 			if (messageOut.equals("99")){
 				System.out.println("a sair..");
 				break;
 			}else if (messageOut.equals("0")){
 				System.out.println(getMenu());
-				messageIn = input.readLine();
+				continue;
 			}else if (messageOut.equals("2")){
 				System.out.println("Please choose a User: ");
 				output.println(scan.nextLine());
 				System.out.print("Enter your message: ");
 				output.println(scan.nextLine());
-//				accessServerUDP(scan.nextLine());
+				messageIn = input.readLine();
+//				accessServerUDP(scan.nextLine()); // Messages and Commands on the same thread
 			}else if (messageOut.equals("3")){
 				System.out.print("Enter your message for all Users: ");
 				output.println(scan.nextLine());
-//				accessServerUDP(scan.nextLine());
+				messageIn = input.readLine();
+//				accessServerUDP(scan.nextLine());// Messages and Commands on the same thread
 			}else {
 				messageIn = input.readLine();
 				if(messageIn != null) {
@@ -56,8 +59,8 @@ public class Client {
 					for(int i = 0; i < stringVec.length; i++)
 						messageIn = messageIn + stringVec[i] + "\n";
 				}
-				System.out.println(messageIn);
 			}
+			System.out.println(messageIn);
 		}
 		scan.close();
 		input.close();
@@ -65,7 +68,7 @@ public class Client {
 		client.close();	
 	}
 	
-//	private static void accessServerUDP(String message) {
+//	private static void accessServerUDP(String message) { // Messages and Commands on the same thread
 //		try {
 //			datagramSocket = new DatagramSocket();
 //			String messageIn = null;
