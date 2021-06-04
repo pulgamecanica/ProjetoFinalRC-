@@ -1,32 +1,39 @@
+package projetoRC;
+
 import java.net.*;
-import java.text.*;
 import java.util.*;
 import java.io.*;
 
 public class Server {
 	private static final File WHITELIST = new File("lista-branca.txt");
 	private static final File BLACKLIST = new File("lista-negra.txt");
-	private static ArrayList<String> onlineUsers = new ArrayList();
+	private static ArrayList<String> onlineUsers = new ArrayList<String>();
 	private static final int PORT = 7142;
-	private static final int PORTUDP = 9031;
-	private static DatagramSocket datagramSocket;
-	private static DatagramPacket outPacket;
     
 	public static void main(String args[]) throws Exception {		
 		ServerSocket server = new ServerSocket(PORT);
 		InetAddress myIPaddress = InetAddress.getLocalHost();
 		System.out.println(myIPaddress.toString() + ":" + PORT + "/TCP");
 		Socket client = null;
-		while (true){
-			client = server.accept();
-			Thread t = new Thread(new EchoClientThread(client));                             
-			t.start();
-		}		
+		try {
+			while (true){
+				client = server.accept();
+				Thread t = new Thread(new EchoClientThread(client));                             
+				t.start();
+			}
+		}catch (Exception e) {
+			System.err.println(e);
+			server.close();
+		}
 	}	
-	
 	public static class EchoClientThread implements Runnable{
-//		private static InetAddress clientInnetAddressIP;
 		private Socket socket;
+		private static DatagramSocket datagramSocket;
+		private static DatagramPacket inPacket, outPacket;
+		private static byte[] buffer;
+		private static InetAddress clientIP; 
+		private static final int PORTUDP = 9031;
+		
 		public EchoClientThread(Socket socket) {
 			this.socket = socket;
 		}
@@ -53,14 +60,16 @@ public class Server {
 				BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));			
 				PrintStream output = new PrintStream(socket.getOutputStream(),true);
 				String messageIn = null, messageOut = null;
-				while ((messageIn = input.readLine()) !=null) {			
+				while (true) {
+					messageIn = input.readLine();
 					System.out.println (clientIP+": "+threadName+": "+messageIn);
 					if (messageIn.equals("1")) {
 						messageOut = "Online Users:-&-";
 						for(String user: onlineUsers)
 							messageOut = messageOut + String.valueOf(onlineUsers.indexOf(user)) + " - " + user + "-&-";
 					} else if (messageIn.equals("2")) {
-						messageOut = "Send Message to user";
+						sendMessageUDP();
+						continue;
 					} else if (messageIn.equals("3")) {
 						messageOut = "Send General User";	
 					} else if (messageIn.equals("4")) {
@@ -82,7 +91,7 @@ public class Server {
 			catch (Exception ex){
 				try {
 					socket.close();
-					System.out.println("Socket Closed :" + clientIP);
+					System.out.println("Something went wrong.... Socket Closed :" + clientIP + " | Err -> " + ex);
 					return;
 				}
 				catch (Exception e) {
@@ -93,7 +102,6 @@ public class Server {
 			onlineUsers.remove(clientIP);	
 			System.out.println("Socket Closed :" + clientIP);
 		}
-	
 		private String getIPs(File file, String name) {
 			String result = name +"IP Addresses: -&-";
 			try { 
@@ -109,16 +117,30 @@ public class Server {
 	    	}
 			return result;
 		}
-//		private void sendMessageUDP(String message) {
-//			try {
-//				clientInnetAddressIP = socket.getInetAddress();
-//				datagramSocket = new DatagramSocket();
-//				outPacket =	new DatagramPacket(message.getBytes(),message.length(), clientInnetAddressIP, PORTUDP);
-//				datagramSocket.send(outPacket);
-//			}catch (Exception ex){
-//				ex.printStackTrace();
-//			}		
-//		}
+		private void sendMessageUDP() {
+			try{
+				datagramSocket = new DatagramSocket(PORTUDP);
+				String messageIn = null, messageOut = null;
+				do{
+					buffer = new byte[256];
+					inPacket = new DatagramPacket(buffer,buffer.length);
+					datagramSocket.receive(inPacket);
+					clientIP = inPacket.getAddress();
+					int clientPort =inPacket.getPort();
+					messageIn =	new String(inPacket.getData(),0,inPacket.getLength()); 
+					System.out.println (clientIP.toString() + ": " + messageIn);
+					messageOut = messageIn;      
+					outPacket =	new DatagramPacket(messageOut.getBytes(), messageOut.length(), clientIP, clientPort);
+					datagramSocket.send(outPacket);
+				} while (messageIn == null);			
+			}
+			catch(IOException ex) {
+				ex.printStackTrace();
+			}
+			finally {
+				datagramSocket.close();
+			}
+		}
 	}
     public static int rand(int min,int max){
         return min + (int)(Math.random() * ((max - min) + 1));

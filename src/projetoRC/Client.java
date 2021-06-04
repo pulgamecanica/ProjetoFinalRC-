@@ -1,21 +1,31 @@
-import java.io.*;
-import java.net.*;
-import java.util.*;
+package projetoRC;
 
-public class Client {	
+import java.io.BufferedReader;
+import java.io.PrintStream;
+import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Client {
 	
 	private static final int PORT = 7142;
-	private static final int PORTUDP = 9031;
 	private static BufferedReader input;
 	private static PrintStream output;
+	private static InetAddress host;
+	private static final int PORTUDP = 9031;
 	private static DatagramSocket datagramSocket;
-	private static DatagramPacket inPacket;
+	private static DatagramPacket inPacket, outPacket;
+	private static byte[] buffer;
+	
 	public static void main(String args[]) throws Exception {
 		if (args.length !=1){
-			System.err.println ("Usage: java TCPClient <host>");
+			System.err.println ("Usage: java Client <host>");
 			System.exit(1);
 		}				
-		String host = args[0];
+		host = InetAddress.getByName(args[0]);
 		String messageOut, messageIn;
 		Socket client = new Socket(host,PORT);
 
@@ -24,8 +34,9 @@ public class Client {
 		output = new PrintStream(
 				client.getOutputStream(),true);
 		System.out.println(getMenu());
+		Scanner scan;
 		while(true) {
-			Scanner scan = new Scanner (System.in); 
+			scan = new Scanner (System.in); 
 			System.out.print(">");  			
 			messageOut = scan.nextLine();
 			output.println(messageOut);
@@ -35,6 +46,9 @@ public class Client {
 			}else if (messageOut.equals("0")){
 				System.out.println(getMenu());
 				messageIn = input.readLine();
+			}else if (messageOut.equals("2")){
+				System.out.print("Enter your message: ");
+				accessServerUDP(scan.nextLine());
 			}else {
 				messageIn = input.readLine();
 				if(messageIn != null) {
@@ -46,10 +60,32 @@ public class Client {
 				System.out.println(messageIn);
 			}
 		}
+		scan.close();
 		input.close();
 		output.close();
 		client.close();	
 	}
+	
+	private static void accessServerUDP(String message) {
+		try {
+			datagramSocket = new DatagramSocket();
+			String messageIn = null;
+			outPacket = new DatagramPacket(message.getBytes(),message.length(),host,PORTUDP);				
+			datagramSocket.send(outPacket);
+			buffer = new byte[256];
+			inPacket = new DatagramPacket(buffer, buffer.length);					
+			datagramSocket.receive(inPacket);
+			messageIn = new String(inPacket.getData(),0, inPacket.getLength());
+			System.out.println(messageIn);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		finally {
+			datagramSocket.close();
+		}
+	}
+	
 	private static String getMenu() {
 		return "MENU CLIENT\n0  - Menu Inicial\n1  - Listar utilizadores online\n2  - Enviar mensagem a um utilizador\n3  - Enviar mensagem a todos os utilizadores\n4  - lista branca de utilizadores\n5  - lista negra de utilizadores\n99 - Sair";
 	}
