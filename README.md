@@ -48,7 +48,7 @@ In this project we programmed a server which takes clients and the clients can m
 
 ## UML
 <h1 style="text-align: center">
-	<img src="images/uml.png" style="height: 50%">
+	<img src="images/UML.png" style="height: 50%">
 </h1>
 
 
