@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
 	
@@ -20,9 +21,12 @@ public class Client {
 			System.exit(1);
 		}				
 		host = InetAddress.getByName(args[0]);
-		String messageOut, messageIn;
 		Socket client = new Socket(host,PORT);
-
+		connect(client, null);
+		client.close();	
+	}
+	public static void connect(Socket client, String buffer) throws Exception {
+		String messageOut, messageIn;
 		input = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		output = new PrintStream(client.getOutputStream(),true);
 		System.out.println(getMenu());
@@ -31,7 +35,22 @@ public class Client {
 			scan = new Scanner (System.in); 
 			System.out.print(">");  			
 			messageOut = scan.nextLine();
-			output.println(messageOut);
+			int connectionTimeOut = 0;
+			try {
+				output.println(messageOut);
+			}catch (Exception e){
+				while(connectionTimeOut < 20) {
+					connectionTimeOut++;
+					System.out.println("im here dude " + String.valueOf(connectionTimeOut));
+					TimeUnit.SECONDS.sleep(1);
+					try {
+						connect(new Socket(host,PORT), messageOut);
+						return;
+					}catch(Exception e2){
+						continue;
+					}
+				}
+			}
 			messageIn = "";
 			if (messageOut.equals("99")){
 				System.out.println("a sair..");
@@ -65,7 +84,6 @@ public class Client {
 		scan.close();
 		input.close();
 		output.close();
-		client.close();	
 	}
 	
 //	private static void accessServerUDP(String message) { // Messages and Commands on the same thread

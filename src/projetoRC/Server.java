@@ -79,6 +79,8 @@ public class Server {
 					} else if (messageIn.equals("99")) {
 						onlineUsers.remove(socket.getInetAddress());
 						break;
+					} else if (messageIn.equals("0")) {
+						continue;
 					} else {
 						messageOut = "Not a Valid option";
 					}	
@@ -128,7 +130,7 @@ public class Server {
 						datagramSocket.send(outPacket);
 					}
 				}else {
-					System.out.println(socket.getInetAddress().toString() + " -> " + receiverIP + ": " + message);   
+					System.out.println(socket.getInetAddress().toString() + " -> " +receiverIP + " - Message: " + message);   
 					message = "Message from " + socket.getInetAddress().toString() + ": " + message;
 					outPacket =	new DatagramPacket(message.getBytes(), message.length(), receiverIP, PORTUDP);
 					datagramSocket.send(outPacket);
